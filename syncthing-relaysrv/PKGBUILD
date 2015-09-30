@@ -1,0 +1,39 @@
+# $Id$
+# Maintainer : Martin Wimpress <code@flexion.org>
+# Maintainer : Jaroslav Lichtblau <svetlemodry@archlinux.org>
+# Contributor: Sauyon Lee <sauyonl@sauyon.com>
+# Contributor: Kevin MacMartin <prurigro@gmail.com>
+# Contributor: korjjj <korjjj+aur@gmail.com>
+
+pkgname=syncthing-relaysrv-git
+_pkgname=syncthing-relaysrv
+pkgver=0.12.0.r8.g215ba72
+pkgrel=1
+pkgdesc="Open Source Continuous Replication / Cluster Synchronization Thing"
+url="http://syncthing.net/"
+license=('MPL')
+arch=('i686' 'x86_64')
+depends=('glibc')
+provides=('syncthing-relaysrv=0.12')
+makedepends=('git' 'go' 'godep' 'inetutils' 'sed')
+source=(${_pkgname}::git+https://github.com/syncthing/relaysrv.git#branch=master)
+sha1sums=('SKIP')
+
+pkgver() {
+    cd "${srcdir}/${_pkgname}"
+    # cutting off 'v' prefix that presents in the git tag
+    git describe --long | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+build() {
+  cd "${srcdir}/${_pkgname}"
+
+  export GOPATH="$srcdir"
+  go get -d -tags purego
+  go build -i -v -ldflags -w
+}
+
+package() {
+  cd "${srcdir}/${_pkgname}"
+  install -Dm755 syncthing-relaysrv "${pkgdir}/usr/bin/syncthing-relaysrv"
+}
